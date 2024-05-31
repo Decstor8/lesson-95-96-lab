@@ -47,11 +47,19 @@ export interface CocktailTypes {
     image: string | null;
     recipe: string;
     isPublished: boolean;
-    ingredients: [
-        {
-            _id: string;
-            ingredientName: string;
-            quantity: string;
-        }
-    ]
+    ingredients: [{
+        _id: string;
+        ingredientName: string;
+        quantity: string;
+    }]
+}
+
+export interface NewCocktails {
+    name: string;
+    image: string | null;
+    recipe: string;
+    ingredients: {
+        ingredientName: string;
+        quantity: string;
+    }[]
 }
