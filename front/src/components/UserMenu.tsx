@@ -33,8 +33,8 @@ const UserMenu: React.FC<Props> = ({ user }) => {
             <Button color="inherit" onClick={handleClick}>
                 Привет, {user.displayName}!
             </Button>
-            {user.image ? (
-                <Avatar src={`${apiUrl}/${user.image}`} sx={{ marginLeft: 2 }} />
+            {user.avatar ? (
+                <Avatar src={`${apiUrl}/${user.avatar}`} sx={{ marginLeft: 2 }} />
             ) : (
                 <Avatar sx={{ marginLeft: 2 }} />
             )}

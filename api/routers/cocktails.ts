@@ -1,92 +1,106 @@
-import { Router as createRouter } from "express";
-import CocktailModel from "../models/Cocktail";
-import { imageUpload as multerMiddleware } from "../multer";
-import authMiddleware, { RequestWithUser } from "../middleware/auth";
-import mongoose, { Types } from "mongoose";
-import permitMiddleware from "../middleware/permit";
+import {Router} from "express";
+import Cocktail from "../models/Cocktail";
+import {imageUpload} from "../multer";
+import auth, {RequestWithUser} from "../middleware/auth";
+import mongoose, {Types} from "mongoose";
+import permit from "../middleware/permit";
+const cocktailsRouter = Router();
 
-const router = createRouter();
-
-router.get('/', async (_req, res, next) => {
+cocktailsRouter.get('/', async (_req, res, next) => {
     try {
-        const cocktailList = await CocktailModel.find();
-        return res.json(cocktailList);
-    } catch (error) {
-        return next(error);
+        const cocktails = await Cocktail.find();
+
+        return res.send(cocktails);
+    } catch (err) {
+        return next();
     }
 });
 
-router.get('/userCocktails', authMiddleware, async (req: RequestWithUser, res, next) => {
+cocktailsRouter.get('/userCocktails', auth, async (req: RequestWithUser, res, next) => {
     try {
-        const { user: userIdQuery } = req.query;
+        const userIdParam = req.query.user as string;
 
-        if (userIdQuery !== req.user?._id.toString()) {
-            return res.status(403).json({ error: 'Доступ запрещен..' });
+        if (userIdParam !== req.user?._id.toString()) {
+            return res.status(403).send({error: 'Access denied!!'});
         }
 
-        const userCocktails = await CocktailModel.find({ user: req.user?._id });
-        return res.json(userCocktails);
-    } catch (error) {
-        return next(error);
+        const result = await Cocktail.find({user: req.user?._id});
+
+        return res.send(result);
+    } catch (err) {
+        return next(err);
     }
 });
 
-router.post('/', authMiddleware, multerMiddleware.single('image'), async (req: RequestWithUser, res, next) => {
+cocktailsRouter.post('/', auth, imageUpload.single('image'), async (req: RequestWithUser, res, next) => {
     try {
-        const newCocktail = new CocktailModel({
+        const cocktail = new Cocktail({
             user: req.user?._id,
             name: req.body.name,
             recipe: req.body.recipe,
             isPublished: req.body.isPublished,
-            ingredients: req.body.ingredients,
+            ingredients: JSON.parse(req.body.ingredients),
             image: req.file ? req.file.filename : null,
         });
 
-        await newCocktail.save();
-        return res.json(newCocktail);
-    } catch (error) {
-        if (error instanceof mongoose.Error.ValidationError) {
-            return res.status(422).json(error);
+        await cocktail.save();
+
+        return res.send(cocktail);
+    } catch (err) {
+        if (err instanceof mongoose.Error.ValidationError) {
+            return res.status(422).send(err);
         }
-        return next(error);
+
+        return next(err);
     }
 });
 
-router.delete('/:id', authMiddleware, permitMiddleware('admin'), async (req, res, next) => {
+cocktailsRouter.delete('/:id', auth, permit('admin'), async (req, res, next) => {
     try {
-        const { id: cocktailId } = req.params;
-        const objectId = new Types.ObjectId(cocktailId);
+        let _id: Types.ObjectId;
 
-        const deletedCocktail = await CocktailModel.findByIdAndDelete(objectId);
-
-        if (!deletedCocktail) {
-            return res.status(403).json({ error: 'Коктейль не найден' });
+        try {
+            _id = new Types.ObjectId(req.params.id);
+        } catch {
+            return res.status(422).send({error: 'Wrong objectId!'});
         }
 
-        return res.json({ message: 'Коктейль удален' });
-    } catch (error) {
-        return next(error);
+        const cocktail = await Cocktail.findByIdAndDelete(_id);
+
+        if (!cocktail) {
+            return res.status(403).send({error: `cocktail not found!`});
+        }
+
+        return res.send({message: 'Cocktail deleted!'});
+    } catch (err) {
+        return next(err);
     }
 });
 
-router.patch('/:id/togglePublished', authMiddleware, permitMiddleware('admin'), async (req, res, next) => {
+cocktailsRouter.patch('/:id/togglePublished', auth, permit('admin'), async (req, res, next) => {
     try {
-        const { id: cocktailId } = req.params;
-        const objectId = new Types.ObjectId(cocktailId);
+        let _id: Types.ObjectId;
 
-        const cocktailToUpdate = await CocktailModel.findById(objectId);
-
-        if (!cocktailToUpdate) {
-            return res.status(403).json({ error: 'Коктейль не найден' });
+        try {
+            _id = new Types.ObjectId(req.params.id);
+        } catch {
+            return res.status(422).send({error: 'Wrong objectId!'});
         }
 
-        await cocktailToUpdate.updateOne({ isPublished: !cocktailToUpdate.isPublished });
-        await cocktailToUpdate.save();
+        const cocktail = await Cocktail.findById(_id);
 
-        return res.json(cocktailToUpdate);
-    } catch (error) {
-        return next(error);
+        if (!cocktail) {
+            return res.status(403).send({error: `Cocktail not found!`});
+        }
+
+        await cocktail.updateOne({isPublished: !cocktail.isPublished});
+        await cocktail.save();
+
+        return res.send(cocktail);
+
+    } catch (err) {
+        return next(err);
     }
 });
 
-export default router;
+export default cocktailsRouter;

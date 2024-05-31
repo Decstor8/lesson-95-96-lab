@@ -1,4 +1,4 @@
-import {GlobalError, UserTypes, ValidationError} from '../../types';
+import {MainError, UserTypes, ValidationError} from '../../types';
 import {createSlice} from '@reduxjs/toolkit';
 import {RootState} from '../../App/store';
 import {googleLogin, loginUser, newUser} from './usersThunks';
@@ -8,7 +8,7 @@ interface UserState {
     registerLoading: boolean;
     registerError: ValidationError | null;
     loginLoading: boolean;
-    loginError: GlobalError | null;
+    loginError: MainError | null;
 }
 
 const initialState: UserState = {

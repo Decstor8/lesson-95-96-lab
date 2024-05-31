@@ -1,5 +1,5 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
-import {GlobalError, LoginMutation, RegisterMutation, RegisterResponse, ValidationError} from '../../types';
+import {MainError, LoginMutation, RegisterMutation, RegisterResponse, ValidationError} from '../../types';
 import axiosApi from '../../axiosApi';
 import {isAxiosError} from 'axios';
 import {unsetUser} from './usersSlice';
@@ -30,7 +30,7 @@ export const newUser = createAsyncThunk<RegisterResponse, RegisterMutation, {rej
     }
 );
 
-export const loginUser = createAsyncThunk<RegisterResponse, LoginMutation, {rejectValue: GlobalError}>(
+export const loginUser = createAsyncThunk<RegisterResponse, LoginMutation, {rejectValue: MainError}>(
     'users/login',
     async (loginMutation, {rejectWithValue}) => {
         try {
@@ -46,7 +46,7 @@ export const loginUser = createAsyncThunk<RegisterResponse, LoginMutation, {reje
     },
 );
 
-export const googleLogin = createAsyncThunk<RegisterResponse, string, {rejectValue: GlobalError}>(
+export const googleLogin = createAsyncThunk<RegisterResponse, string, {rejectValue: MainError}>(
     'google/login',
     async (credential, {rejectWithValue}) => {
         try {
