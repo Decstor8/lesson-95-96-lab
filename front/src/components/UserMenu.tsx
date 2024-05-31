@@ -28,6 +28,10 @@ const UserMenu: React.FC<Props> = ({ user }) => {
         navigate('/login');
     };
 
+    const toMyCocktails = () => {
+        navigate('/myCocktails');
+    };
+
     return (
         <Box display="flex" alignItems="center">
             <Button color="inherit" onClick={handleClick}>
@@ -39,6 +43,7 @@ const UserMenu: React.FC<Props> = ({ user }) => {
                 <Avatar sx={{ marginLeft: 2 }} />
             )}
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose} keepMounted>
+                <MenuItem onClick={toMyCocktails}>My cocktails</MenuItem>
                 <MenuItem onClick={handleLogout}>Выйти</MenuItem>
             </Menu>
         </Box>
