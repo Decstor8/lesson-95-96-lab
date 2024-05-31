@@ -8,7 +8,7 @@ const rootPath = __dirname;
 const config = {
     rootPath,
     mongoose: {
-        db: 'mongodb://localhost/cocktails',
+        db: 'mongodb://localhost/recipes',
     },
     publicPath: path.join(rootPath, 'public'),
     google: {
